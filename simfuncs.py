@@ -11,6 +11,9 @@ import scipy as sp
 from numpy.random import default_rng
 import tqdm
 import random
+from matplotlib.colors import LogNorm
+import matplotlib
+
 
 
 
@@ -20,9 +23,9 @@ def randomprob(probability):
     seed = random.randint(0,10000)
     rg = default_rng(seed)
     y = rg.random()
-    if x < p:
+    if y < probability:
         return 1
-    if x >= p:
+    if y >= probability:
         return 2
 
 #%%
@@ -33,11 +36,15 @@ class oslo:
     
     def __init__(self, L, prob): #calling class objects length of model and probability
         self.L = L 
-        self.prob = p
+        self.p = prob
         self.z = np.zeros(L) #initialise array length L that contains slopes at each site (initially 0 will add values later)
         self.h = np.zeros(L) #same for heights as slopes use np.zeros over [] as it allows easier manipulation of elements and axes later on
         self.thresholdz = []
         self.sites = []
+        self.s_size = []
+        
+    def s_size(self):
+        return s_size
         
     def drive(self): #define a drive function for adding grain to site_0 
         self.z[0] = self.z[0] +1 #definition of drive is adding 1 grain to the first site in the model
@@ -66,7 +73,7 @@ class oslo:
             if self.z[i] > self.thresholdz[i]:
                 #sites_relaxed.append(i)
                 sites_totalrelax = False
-                break
+                break #ensures inner loop stops executing
             else:
                 sites_totalrelax = True
                 
@@ -94,17 +101,115 @@ class oslo:
                 self.thresholdz[i] = randomprob(self.p)
                 
                 
+    def animate(self):
+        grid = grid(self)
+        for i in range(self.L):
+            for j in range(self.heights[i]):
+                grid.addgrain(i+1)
+    
+    def h(self):
+        return self.h
+    def h_1(self):
+        return self.h_data
+    def steadystate(self):
+        for i in range(len(self.h_data)):
+            if self.h_data[i] > np.max(self.h_1[len(self.h_data())-100:])
+    def mean_h(self):
+        return np.mean(self.h_data[self.steadystate:])
+    
+    
+                
             
-        
-        
-
+            
+                
+                
+                
+            
+#create a class that sets up animation for grid
 class grid:
     
     def __init__(self, L):
-        self.__L = L
-        self.__height = 3*L
-        self.__initgrid = np.zeros(self.__height, L) #creates a 2d array with dimensions of height and length
+        self.L = L
+        self.gheight = 3*L
+        self.initgrid = np.zeros((3*L, L)) #creates a 2d array with dimensions of height and length
+        
+    def addgrain(self, g):
+        for i in range(self.gridh):
+            if self.initgrid[i][i-1] ==0:
+                self.initgrid[i][i-1] =1
+            
+    def minusgrain(self,g):
+        for i in range(self.gridh):
+            if self.initgrid[i][i-1] ==1:
+                self.initgrid[i][i-1] =0
+        
+        
+    def showanimation(self):
+        
+        params = {
+            'font.family' : 'serif',
+            'font.size': 13.5,
+            'figure.figsize':  [8.8, 8.8/1.618],
+            'axes.grid': True,
    
+        }
+
+        plt.rcParams.update(params)
+        
+        fig = plt.figure()
+        anim_matrix = self.initgrid
+        ncolors = matplotlib.ListedColormap(['white', 'black'])
+        boundaries = [0,0,1,1]
+        norm = matplotlib.colors.BoundaryNorm(boundaries, ncolors.N)
+        
+        plt.pcolormesh(anim_matrix, norm = norm, cmap = ncolors)
+        
+        plt.xticks(np.arange(0,self.L, 1))
+        plt.yticks(np.arange(0,3*self.L, 1))
+        
+        plt.grid()
+        plt.show()
+        
+        
+        
+        
+        
+            
+#%%
+L =10
+initgrid = np.zeros((3*L, L))
+cmap = matplotlib.colors.ListedColormap(['white', 'black'])
+bounds = [0, 0, 1, 1]
+norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)  
+plt.pcolormesh(initgrid, edgecolors=None, linewidth=1, norm=norm, cmap=cmap)
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
         
         
